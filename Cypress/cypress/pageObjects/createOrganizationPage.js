@@ -30,7 +30,8 @@ class CreateOrg {
     }
     
     createOrganization() {
-        this.organizationNameInput.type(faker.commerce.department(), {force:true})
+        this.nextButton.should('be.disabled')
+        this.organizationNameInput.type(faker.company.companyName(), {force:true})
         this.nextButton.click()  //{force: true} ????
         this.uploadLogoPrompt.click()
         cy.get('input[type="file"]').selectFile('cypress/fixtures/avatar.jpg', {force: true})
@@ -39,6 +40,8 @@ class CreateOrg {
         // Vise se ne pojavljuje!?
         // this.confirmationButton.click({force:true})
     }
+
+    
 }
 
 export const organization = new CreateOrg();
