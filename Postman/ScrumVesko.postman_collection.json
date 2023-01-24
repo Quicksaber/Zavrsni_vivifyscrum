@@ -1,0 +1,256 @@
+{
+	"info": {
+		"_postman_id": "f4dfe792-b0ba-417d-8673-0dd62417e6d4",
+		"name": "ScrumVesko",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25237977"
+	},
+	"item": [
+		{
+			"name": "Login with valid credentials",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.environment.set(\"token\", jsonData.token);\r",
+							"pm.environment.set(\"user_id\", jsonData.user.id);\r",
+							"\r",
+							"tests[\"access_token = \" + jsonData.token] = typeof jsonData.token != 'undefined';\r",
+							"tests[\"user id = \" + jsonData.user.id] = typeof jsonData.user.id == 'number';\r",
+							"tests[\"Trial acc = \" + jsonData.user.is_trial] = typeof jsonData.user.is_trial == 'boolean';"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{password}}\",\r\n  \"g-recaptcha-response\": \"{{g-recaptcha-response}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiUrl}}/login",
+					"host": [
+						"{{apiUrl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create valid organizations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"//setujemo u env organization_id\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"var organization_id = jsonData.id;\r",
+							"pm.environment.set(\"organization_id\", organization_id);\r",
+							"\r",
+							"//test da li je org_name i user_id iz env saglasan sa onim iz responsa\r",
+							"\r",
+							"var nameEnv = pm.environment.get(\"org_name\");\r",
+							"var user_idEnv = pm.environment.get(\"user_id\");\r",
+							"\r",
+							"pm.test(\"Checking org_name and user_id \", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(jsonData.name).to.eql(nameEnv);\r",
+							"\r",
+							"    pm.expect(jsonData.users[0].id).to.eql(user_idEnv);\r",
+							"}); "
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "{{org_name}}",
+							"type": "text"
+						},
+						{
+							"key": "avatar_crop_cords",
+							"value": "{}",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"value": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{apiUrl}}/organizations",
+					"host": [
+						"{{apiUrl}}"
+					],
+					"path": [
+						"organizations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create org bez imena",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "avatar_crop_cords",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"value": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{apiUrl}}/organizations",
+					"host": [
+						"{{apiUrl}}"
+					],
+					"path": [
+						"organizations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create org bez tokena",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vY3lwcmVzcy1hcGkudml2aWZ5c2NydW0tc3RhZ2UuY29tL2FwaS92Mi9sb2dpbiIsImlhdCI6MTY3NDU0MTYwMiwibmJmIjoxNjc0NTQxNjAyLCJqdGkiOiJsOGx5Y05WUU96NjV6VVFFIiwic3ViIjoyOTY5LCJwcnYiOiI5ZjhhMjM4OWEyMGNhMDc1MmFhOWU5NTA5MzUxNTUxN2U5MGUxOTRjIiwidXNlciI6eyJpZCI6Mjk2OSwidG9rZW5fdXVpZCI6IkRmcHJPS2ZJNHZ5TmZDU3kifX0.WhzaIJHTELc1B5zk7jJckVi1INT2-OtS5k26Qx9xd2",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "{{org_name}}",
+							"type": "text"
+						},
+						{
+							"key": "avatar_crop_cords",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"value": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{apiUrl}}/organizations",
+					"host": [
+						"{{apiUrl}}"
+					],
+					"path": [
+						"organizations"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
